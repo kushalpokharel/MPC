@@ -90,6 +90,8 @@ impl FieldOps for FieldElement {
     }
 }
 
+// Goal: Parties have shares corresponding to x and y.
+// The goal for each party is to have the shares of z where z = x*y
 fn main(){
 
     //We act as a trusted dealer here to distribute the shares to all the parties (two).
