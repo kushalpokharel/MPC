@@ -1,29 +1,56 @@
 
 mod field_element;
 mod party;
+mod triple_generator;
 
 use field_element::FieldElement;
-use std::iter;
+use triple_generator::TripleGenerator;
 use party::Party;
 
 fn main() {
+
+    // Triple generator simulation
+    println!("--- SPDZ Offline Phase Simulation ---");
+
+    let dealer = TripleGenerator::new();
+    let (p1_triple, p2_triple) = dealer.generate_triple();
+
+    println!("Generated Triples!");
+    println!("Party 1 has shares of a: {:?}", p1_triple.a);
+    println!("Party 2 has shares of a: {:?}", p2_triple.a);
+
+    // Verification (Just to prove the math works)
+    let recon_a = p1_triple.a + p2_triple.a;
+    let recon_b = p1_triple.b + p2_triple.b;
+    let recon_c = p1_triple.c + p2_triple.c;
+
+    println!("Reconstructed a: {:?}", recon_a); // Should be 5
+    println!("Reconstructed b: {:?}", recon_b); // Should be 7
+    println!("Reconstructed c: {:?}", recon_c); // Should be 35
+    
+    // Check property: a * b = c ?
+    let product = recon_a * recon_b;
+    println!("Does a * b == c? {}", product == recon_c);
+
+
+
     // 1. Setup the global alpha and beta for each party(two party only for illustration)
-    let modulus = 7919;
-    let alpha = FieldElement::new(50,modulus);
+
+    let alpha = FieldElement::new(50);
     // for each party one beta
-    let betas:Vec<FieldElement> = vec![FieldElement::new(12,modulus), FieldElement::new(15,modulus)];
-    let alpha_1 = FieldElement::new(15, modulus);
-    let alpha_2:FieldElement = &alpha-&alpha_1;
+    let betas:Vec<FieldElement> = vec![FieldElement::new(12), FieldElement::new(15)];
+    let alpha_1 = FieldElement::new(15,);
+    let alpha_2:FieldElement = alpha-alpha_1;
     let alphas = vec![alpha_1, alpha_2];
     
     // 2. Setup the alpha_beta for each and secret share between the parties (manually)
     // ideally, would like to call a function secret_share that would generate n-1 random shares
     // and n_th share such that it would hold summation with the secret
-    let alpha_beta:Vec<FieldElement> = betas.iter().map(|beta| &alpha*beta).collect();
-    let alpha_beta0_1 = FieldElement::new(123, modulus);
-    let alpha_beta0_2 = &alpha_beta[0]-&alpha_beta0_1;
-    let alpha_beta1_1 = FieldElement::new(527, modulus);
-    let alpha_beta1_2 = &alpha_beta[1]-&alpha_beta1_1;
+    let alpha_beta:Vec<FieldElement> = betas.iter().map(|beta| alpha*(*beta)).collect();
+    let alpha_beta0_1 = FieldElement::new(123);
+    let alpha_beta0_2 = alpha_beta[0]-alpha_beta0_1;
+    let alpha_beta1_1 = FieldElement::new(527);
+    let alpha_beta1_2 = alpha_beta[1]-alpha_beta1_1;
 
     // 3. Setup party with all the available information from the offline source (main function)
     // these should also have many other setup vairables like multiple beaver tripes, along with 
@@ -48,7 +75,7 @@ fn main() {
     let status = party1.check_authenticity_of_reconstructed_alpha(&vec![party_1_alpha, party_2_alpha], &party1_alpha_beta);
     assert!(status == true);
     // Simulating the change of alpha from party 2.
-    party2.change_alpha(FieldElement::new(27, modulus));
+    party2.change_alpha(FieldElement::new(27));
     // Failing case 
     party_2_alpha = party2.broadcast_alpha_share().clone();
     let failing_status = party1.check_authenticity_of_reconstructed_alpha(&vec![party_1_alpha, party_2_alpha], &party1_alpha_beta);

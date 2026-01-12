@@ -4,47 +4,44 @@ use std::iter::Sum;
 
 
 pub type PRIMITIVE_TYPE = i32;
+const MODULUS:i32 = 7919;
+
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub struct FieldElement {
     value: PRIMITIVE_TYPE , 
-    modulus: PRIMITIVE_TYPE
 }
 
 impl FieldElement{
-    pub fn new(value: PRIMITIVE_TYPE, modulus:PRIMITIVE_TYPE)->Self{
+    pub fn new(value: PRIMITIVE_TYPE)->Self{
         FieldElement{
-            value,
-            modulus
+            value
         }
     }
 }
 
-impl<'a, 'b> Add<&'b FieldElement> for &'a FieldElement {
+impl Add<FieldElement> for FieldElement {
     type Output = FieldElement;
-    fn add(self, other: &FieldElement) -> FieldElement {
+    fn add(self, other: FieldElement) -> FieldElement {
         FieldElement {
-            value: (self.value + other.value) % self.modulus,
-            modulus: self.modulus,
+            value: (self.value + other.value) % MODULUS,
         }
     }
 }
 
-impl<'a, 'b> Sub<&'b FieldElement> for &'a FieldElement{
+impl Sub<FieldElement> for FieldElement{
     type Output = FieldElement;
-    fn sub(self, other: &FieldElement) -> FieldElement {
+    fn sub(self, other: FieldElement) -> FieldElement {
         FieldElement {
-            value: (self.value - other.value + self.modulus) % self.modulus,
-            modulus: self.modulus,
+            value: (self.value - other.value + MODULUS) % MODULUS,
         }
     }
 }
 
-impl<'a, 'b> Mul<&'b FieldElement> for &'a FieldElement{
+impl Mul<FieldElement> for FieldElement{
     type Output = FieldElement;
-    fn mul(self, other: &FieldElement) -> FieldElement {
+    fn mul(self, other: FieldElement) -> FieldElement {
         FieldElement {
-            value: (self.value * other.value) % self.modulus,
-            modulus: self.modulus,
+            value: (self.value * other.value) % MODULUS,
         }
     }
 }
@@ -52,10 +49,10 @@ impl<'a, 'b> Mul<&'b FieldElement> for &'a FieldElement{
 impl<'a> Sum<&'a FieldElement> for FieldElement {
     fn sum<I: Iterator<Item = &'a FieldElement>>(mut iter: I) -> Self {
         match iter.next() {
-            None => FieldElement::new(0, 1),
+            None => FieldElement::new(0),
             Some(first) => {
-                let init = FieldElement::new(first.value % first.modulus, first.modulus);
-                iter.fold(init, |acc, x| &acc + x)
+                let init = FieldElement::new(first.value % MODULUS);
+                iter.fold(init, |acc, x| acc + *x)
             }
         }
     }

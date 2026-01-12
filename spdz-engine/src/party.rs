@@ -37,10 +37,10 @@ impl Party{
         &self.alpha_beta_share
     }
     pub fn check_authenticity_of_reconstructed_alpha(&self, alpha_shares:&Vec<FieldElement>, alpha_beta_shares:&Vec<FieldElement>)-> bool{
-        let alpha:FieldElement = alpha_shares.into_iter().fold(FieldElement::new(0,1), |acc, new|new+&acc);
+        let alpha:FieldElement = alpha_shares.into_iter().fold(FieldElement::new(0), |acc, new|*new+acc);
         let alpha_beta:FieldElement = alpha_beta_shares.iter().sum();
         println!("Alpha {:?} beta{:?} alpha beta {:?}", alpha, self.beta, alpha_beta);
-        if &alpha*&self.beta==alpha_beta{
+        if alpha*self.beta==alpha_beta{
             true
         }
         else{
