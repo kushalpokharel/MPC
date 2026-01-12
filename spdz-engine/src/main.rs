@@ -33,6 +33,43 @@ fn main() {
     println!("Does a * b == c? {}", product == recon_c);
 
 
+    // simulate the x*y=z calculation for two parties holding the shares of x and y.
+    let x = FieldElement::new(22);
+    let y = FieldElement::new(11); 
+    let x1 = FieldElement::new(9); // party one x
+    let x2 = x - x1; // party two x
+    let y1 = FieldElement::new(3); // party one y
+    let y2 = y - y1; // party two y
+
+    // start of the protocol.
+    // parties share the shifted value of their shares i.e x1-a
+    let shifted_party1_x = x1 - p1_triple.a;
+    let shifted_party2_x = x2 - p2_triple.a;
+    let shifted_party1_y = y1 - p1_triple.b;
+    let shifted_party2_y = y2 - p2_triple.b;
+
+    // now shares of z can be derived with 
+    // z = x*y = (d+a)*(e+b) = d*e+a*e+ab+b*d => 
+    // share of a*b=c => we need d and e by opening their shares
+    // simulate d1 as broadcasted by part1.
+
+    // Since a and b are random, this doesn't leak any information
+    let d = shifted_party1_x+shifted_party2_x;
+    let e = shifted_party1_y+shifted_party2_y;
+
+    // finally calculate the shares for each party
+    let share1 = p1_triple.c+ d*p1_triple.b + p1_triple.a*e +d*e;
+    // no need to add the constant twice. other values have variable(shares) which will get added later
+    let share2 = p2_triple.c+ d*p2_triple.b + p2_triple.a*e ;
+
+    let reconstructed_value = share1+share2;
+    let z = x*y;
+    println!("Values x, y and z {:?} {:?} {:?}" , share1,share2,reconstructed_value);
+    assert!(z==reconstructed_value);
+
+    
+    println!("==============================================================");
+    println!("Verification of MAC and that the other parties are sharing correct alpha shares");
 
     // 1. Setup the global alpha and beta for each party(two party only for illustration)
 
