@@ -1,12 +1,14 @@
 
 use std::ops::{Add, Mul, Sub};
 use std::iter::Sum;
+use serde::{Serialize, Deserialize};
 
 
 pub type PRIMITIVE_TYPE = i32;
 const MODULUS:i32 = 7919;
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone, Copy, Deserialize, Serialize)]
+#[serde(transparent)]
 pub struct FieldElement {
     value: PRIMITIVE_TYPE , 
 }

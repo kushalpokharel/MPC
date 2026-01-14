@@ -46,6 +46,7 @@ impl NetworkManager{
     }
     pub fn receive_data(&mut self, data:&mut [u8])->io::Result<()>{
         self.stream.read(data)?;
+        println!("Received {:?}", data);
         Ok(())
         
     }
